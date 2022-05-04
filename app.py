@@ -32,6 +32,7 @@ class Book(db.Model):
           'author': self.author
         }
 
+
 ### ROUTE
 
 @app.route('/', methods=["GET", "POST"])
@@ -69,25 +70,26 @@ def read():
 
 
 @app.route("/update", methods=["POST"])
-def update():
+def update(): 
     try:
-        newtitle = request.form.get("newtitle")
-        oldtitle = request.form.get("oldtitle")
-        book = Book.query.filter_by(title=oldtitle).first()
-        book.title = newtitle
-        db.session.commit()
-    except Exception as e:
-        print("Couldn't update book title")
-        print(e)
-    return redirect("/")
+        book = Book.query.get(request.json["id"])
 
-@app.route("/delete", methods=["POST"])
+        book.title = request.json['title']
+        book.author = request.json['author']
+
+        db.session.commit()
+        return book.toDict()
+    except Exception as e:
+        print(e)
+        return("Couldn't update ")
+
+
+@app.route("/delete", methods=["DELETE"])
 def delete():
-    title = request.form.get("title")
-    book = Book.query.filter_by(title=title).first()
+    book = Book.query.get(request.json["id"])
     db.session.delete(book)
     db.session.commit()
-    return redirect("/")
+    return "Deleted"
 
 if __name__ == "__main__":
   app.run(host='0.0.0.0', debug=True)
